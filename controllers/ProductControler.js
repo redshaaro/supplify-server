@@ -82,6 +82,30 @@ const deleteProduct = async (req, res) => {
     res.status(500).json({ error: "Failed to delete product" });
   }
 };
+const getProductsByCategory = async (req, res) => {
+  const categoryId = parseInt(req.params.id);
+
+  try {
+    const products = await prisma.product.findMany({
+      where: {
+        category_id: categoryId,
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    if (!products.length) {
+      return res.status(404).json({ error: 'No products found for this category' });
+    }
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch products by category' });
+  }
+};
+
 
 module.exports = {
   getAllProducts,
@@ -89,4 +113,5 @@ module.exports = {
   createProduct,
   updateProduct,
   deleteProduct,
+  getProductsByCategory
 };

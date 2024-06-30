@@ -78,6 +78,19 @@ model Product {
   description   String?
   wishlists     Wishlist[]
   orderProducts OrderProduct[]
+  offers        Offer[]
+}
+model Offer {
+  offer_id     Int       @id @default(autoincrement())
+  product      Product   @relation(fields: [product_id], references: [product_id])
+  supplier     Supplier  @relation(fields: [supplier_id], references: [supplier_id])
+
+
+  supplier_id  Int
+  product_id   Int
+  discount     Float
+  start_date   DateTime
+  end_date     DateTime
 }
 
 // Define the data model for the Order entity
@@ -155,6 +168,8 @@ model Supplier {
   national_id         String
   minimum_order_price Float
   orders              Order[]
+  offers        Offer[]
+
 }
 
 // Define the data model for the Category entity

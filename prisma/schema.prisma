@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = "postgresql://postgres.sunatxkujcgzjorsfuiy:rE55EaFWBmQyWvKg@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+  directUrl = "postgresql://postgres.sunatxkujcgzjorsfuiy:rE55EaFWBmQyWvKg@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
+}
+
+
+model RestaurantManager {
+  manager_id Int    @id @default(autoincrement())
+  branch     Branch @relation(fields: [branch_id], references: [branch_id])
+  branch_id  Int
+  first_name String
+  last_name  String
+  email      String @unique
+  password   String
+  telephone  String
+  role       String // Assuming 'role' as a string for simplicity
+}
+
+// Define the data model for the Branch entity
+model Branch {
+  branch_id      Int                 @id @default(autoincrement())
+  restaurant     Restaurant          @relation(fields: [restaurant_id], references: [restaurant_id])
+  restaurant_id  Int
+  branch_name    String
+  branch_code    String
+  branch_address String
+  managers       RestaurantManager[]
+  wishlists      Wishlist[]
+  orders         Order[]
+}
+
+// Define the data model for the Restaurant entity
+model Restaurant {
+  restaurant_id   Int             @id @default(autoincrement())
+  owner           RestaurantOwner @relation(fields: [owner_id], references: [owner_id])
+  owner_id        Int
+  restaurant_name String
+  cuisine_type    String
+  branches        Branch[]
+}
+
+// Define the data model for the Restaurant Owner entity
+model RestaurantOwner {
+  owner_id      Int          @id @default(autoincrement())
+  password      String
+  email         String       @unique
+  national_id   String
+  first_name    String
+  last_name     String
+  telephone     String
+  commercial_id String
+  restaurants   Restaurant[]
+}
+
+// Define the data model for the Wishlist entity
+model Wishlist {
+  wishlist_id Int      @id @default(autoincrement())
+  branch      Branch   @relation(fields: [branch_id], references: [branch_id])
+  branch_id   Int
+  product     Product  @relation(fields: [product_id], references: [product_id])
+  product_id  Int
+  date_added  DateTime @default(now())
+}
+
+// Define the data model for the Product entity
+model Product {
+  product_id    Int            @id @default(autoincrement())
+  category      Category       @relation(fields: [category_id], references: [category_id])
+  category_id   Int
+  product_name  String
+  price         Float
+  image         String?
+  description   String?
+  wishlists     Wishlist[]
+  orderProducts OrderProduct[]
+}
+
+// Define the data model for the Order entity
+model Order {
+  order_id      Int            @id @default(autoincrement())
+  branch        Branch         @relation(fields: [branch_id], references: [branch_id])
+  branch_id     Int
+  supplier      Supplier       @relation(fields: [supplier_id], references: [supplier_id])
+  supplier_id   Int
+  driver        Driver?        @relation(fields: [driver_id], references: [driver_id])
+  driver_id     Int?
+  review_id     Int?
+  size          String
+  arrival       DateTime
+  destination   String
+  order_status  String
+  products      String // Assuming 'products' as a string for simplicity
+  order_date    DateTime
+  order_time    DateTime
+  total_price   Float
+  orderProducts OrderProduct[] // Add the reverse relation
+
+  @@index([branch_id], name: "branch_id_index")
+}
+
+// Define the data model for the OrderProduct entity
+model OrderProduct {
+  op_id        Int     @id @default(autoincrement())
+  order        Order   @relation(fields: [order_id], references: [order_id])
+  order_id     Int
+  product      Product @relation(fields: [product_id], references: [product_id])
+  product_id   Int
+  product_name String
+  quantity     Int
+  price_each   Float
+
+  @@index([order_id], name: "order_id_index")
+}
+
+// Define the data model for the Driver entity
+model Driver {
+  driver_id      Int     @id @default(autoincrement())
+  driver_name    String
+  car_license    String
+  driver_license String
+  national_id    String
+  storage_size   String
+  telephone      String
+  orders         Order[]
+}
+
+// Define the data model for the Review entity
+model Review {
+  review_id   Int      @id @default(autoincrement())
+  order_id    Int?
+  employee    Employee @relation(fields: [employee_id], references: [employee_id])
+  employee_id Int
+  rating      Int
+  comment     String
+
+  @@index([employee_id], name: "employee_id_index")
+}
+
+// Define the data model for the Supplier entity
+model Supplier {
+  supplier_id         Int     @id @default(autoincrement())
+  location            String
+  first_name          String
+  last_name           String
+  email               String  @unique
+  password            String
+  telephone           String
+  business_name       String
+  commercial_id       String
+  national_id         String
+  minimum_order_price Float
+  orders              Order[]
+}
+
+// Define the data model for the Category entity
+model Category {
+  category_id   Int       @id @default(autoincrement())
+  category_name String
+  products      Product[]
+}
+
+// Define the data model for the Employee entity
+model Employee {
+  employee_id Int      @id @default(autoincrement())
+  first_name  String
+  last_name   String
+  email       String   @unique
+  password    String
+  address     String
+  job         String
+  reviews     Review[]
+}
